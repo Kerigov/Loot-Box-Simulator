@@ -1,0 +1,81 @@
+//Wire up the views (exactly as defined in XML)
+        boxSimuView = findViewById<TextView>(R.id.boxSimuView)
+        runSimuBtn = findViewById<Button>(R.id.runSimubBtn)
+        batchInput = findViewById<EditText>(R.id.batchInput)
+        grindSwitch = findViewById<CheckBox>(R.id.grindSwitch)
+        tvOutputConsole = findViewById<TextView>(R.id.tvOutputConsole)
+
+        //Main execution trigger
+        runSimuBtn.setOneClickListener setOneClickListenser@{
+            //Clear previous run and start fresh log
+            tvOutputConsole.text = "=== NEW SIMULATION STARTED ===\n"
+
+            val isGrindMode = grindSwitch.isChecked
+
+            if (isGrindMode) {
+                runGrindMode()
+            } else {
+                // Standard batch mode - validate input safely
+                val inputText = batchInput.text.toString().trim()
+
+                if (inputText.isBlank()) {
+                    Toast.makeText(this, "Please enter a valid batch size!", Toast.LENGTH_SHORT).show()
+                        return@setOneClickListenser
+
+                }
+
+                val batchSize = inputText.toIntOrNull()
+                if(batchSize == null || batchSize <= 0) {
+                    Toast.makeText(this, "Batch size must be a positive integer!", Toast.LENGTH_SHORT).show()
+                    return@setOneClickListenser
+                }
+                 runBatchMode(batchSize)
+            }
+
+            //BATCH MODE: for-loop exactly the number of times requested
+            private fun runBatchMode(batchSize: Int) {
+                tvOutputConsole.append("Running standard batch of $batchSize looy boxes...\n\n")
+
+                for (i in 1..batchSize) {
+                    val drop = simulationRoll()
+                    tvOutputConsole.append("Box #$i -> $drop\n")
+
+                }
+
+                tvOutputConsole.append("\n=== BATCH SIMULATION COMPLETE ===\n\n")
+
+            }
+
+            //GRIND MODE: while-loop until Legendary appears (ignores batch input)
+            private fun runGrindMode() {
+                tvOutputConsole.append("GRIND MODE ACTIVATED - Rolling until Legendary...\n\n")
+
+                var attempts = 0
+
+                while (true) {
+                    attempts++
+                    val drop = simulationRoll()
+
+                    tvOutputConsole.append("Attempt #$attempts -> $drop\n")
+
+                    if (drop.startWith("Legendary")) {
+                        tvOutputConsole.append("\n LEGENDARY DROPPED AFTER $attempts ATTEMPTS! \n")
+                        tvOutputConsole.append("=== GRIND MODE COMPLETE ===")
+                        break
+                    }
+                }
+            }
+
+            //RNG + Drop Table using WHEN statement (exactly as required)
+            private fun simlationRoll(): String {
+                val roll = Random.nextInt(1, 101)   //1 to 100 inclusive
+
+                return when (roll) {
+                    in 1..60 -> "Common (Soggy Boot)"
+                    in 61..85 -> "Rare (Steel Broadsword)"
+                    in 86..96 -> "Epic (Amulet of Arrogrance)"
+                    in 97..100 -> "Legendary (TO's Golden Ferrari)"
+                    else -> "ERROR" //impossible, but kept for safety
+                }
+            }
+    }
